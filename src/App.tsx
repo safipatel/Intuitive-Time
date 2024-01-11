@@ -1,4 +1,6 @@
 import React, {
+  MutableRefObject,
+  RefObject,
   useCallback,
   useEffect,
   useMemo,
@@ -26,7 +28,7 @@ import {
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import moment, { Duration, Moment } from "moment";
 import { Gauge, Line } from '@ant-design/plots';
-import { Datum, GaugeConfig } from "@ant-design/charts";
+import { Datum, GaugeConfig, Options, Plot } from "@ant-design/charts";
 require("moment-duration-format");
 
 const firebaseApp = initializeApp({
@@ -143,10 +145,10 @@ function DisplayStats() {
     return <></>;
   }
 
-  return <DisplayWriting startTime={startTime} />;
+  return <DisplayWriting startTime={startTime}/>;
 }
 
-function DisplayWriting({ startTime }: { startTime: Moment }) {
+function DisplayWriting({ startTime}: { startTime: Moment}) {
   const timeSpentDuration = moment.duration(moment().diff(startTime));
   const timeLeftDuration = moment.duration(
     startTime.clone().add(16, "hours").diff(moment())
@@ -158,15 +160,17 @@ function DisplayWriting({ startTime }: { startTime: Moment }) {
   const percentageLeft = 100 - percentageSpent;
   
   const config: GaugeConfig = {
-    percent: timeSpentDuration.asSeconds() % 10 / 100,
+    percent: percentageSpent / 100,
     range: {
       color: '#30BF78',
     },
+    // innerRadius: 0.7,
     indicator: {
       pointer: {
-        style: {
-          stroke: '#D0D0D0',
-        },
+          style: {
+            lineWidth: 5,
+            stroke: '#D0D0D0',
+          }
       },
       pin: {
         style: {
@@ -175,18 +179,21 @@ function DisplayWriting({ startTime }: { startTime: Moment }) {
       },
     },
     axis: {
+      min: 0,
+      max: 1,
       label: {
         formatter(v:string) {
-          return Number(v) * 100;
+          return (Number(v)* 100).toFixed(0) + "%\n" + startTime.clone().add(Number(v) * 16, "hours").format("hh:mmA");
         },
       },
+      tickInterval: 0.05,
       subTickLine: {
-        count: 3,
+        count: 1,
       },
     },
     statistic: {
       content: {
-        formatter: (percent: ( Datum | undefined)) => percent ? `Rate: ${(percent["percent"] * 100).toFixed(3)}%` : "0",   
+        formatter: (percent: ( Datum | undefined)) => percent ? `Spent: ${(percent["percent"] * 100).toFixed(3)}%` : "0",   
           style: {
           color: 'rgba(0,0,0,0.65)',
           fontWeight: 42,
@@ -194,6 +201,7 @@ function DisplayWriting({ startTime }: { startTime: Moment }) {
       },
     },
   };
+
   return (
     <div className="displayStats"> 
       <Gauge {...config} />
