@@ -25,6 +25,8 @@ import {
 } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import moment, { Duration, Moment } from "moment";
+import { Gauge, Line } from '@ant-design/plots';
+import { Datum, GaugeConfig } from "@ant-design/charts";
 require("moment-duration-format");
 
 const firebaseApp = initializeApp({
@@ -111,27 +113,27 @@ function DisplayStats() {
 
   // console.log(loadedStartTimeContainer?.[0].start);
   // console.log(status);
-  const startTime = moment(loadedStartTimeContainer?.[0].start.toDate());
+  // const startTime = moment(loadedStartTimeContainer?.[0].start.toDate());
 
   // States that update every second or if startTime changes
-  const [timeSpentDuration, setTimeSpentDuration] = useState<Duration>(
-    moment.duration()
-  );
+  const [startTime, setStartTime] = useState<Moment>(moment());
 
-  // Callback function that updates everytime the data changes 
+  // Callback function that updates everytime the data changes
   const updateStats = useCallback(() => {
     if (!loadedStartTimeContainer?.[0]?.start) {
       return;
     }
-    setTimeSpentDuration(
-      moment.duration(moment().diff(loadedStartTimeContainer[0].start.toDate()))
-    );
+    setStartTime(moment(loadedStartTimeContainer?.[0].start.toDate()));
+    // setTimeSpentDuration(
+    //   moment.duration(moment().diff(loadedStartTimeContainer[0].start.toDate()))
+    // );
   }, [loadedStartTimeContainer]);
 
   // Resets the interval every second if the data changes which would have changed updateStats()
   const intervalRef = useRef<NodeJS.Timer>();
   useEffect(() => {
-    updateStats();    // Need this here in order to update the numbers right away and not wait a second when page first loads
+    // console.log("hello");
+    updateStats(); // Need this here in order to update the numbers right away and not wait a second when page first loads
     const id = setInterval(updateStats, 1000);
     intervalRef.current = id;
     return () => clearInterval(intervalRef.current);
@@ -141,28 +143,78 @@ function DisplayStats() {
     return <></>;
   }
 
-  return (
-    <DisplayWriting
-      startTime={startTime}
-      timeSpentDuration={timeSpentDuration}
-    />
-  );
+  return <DisplayWriting startTime={startTime} />;
 }
 
-function DisplayWriting({
-  startTime,
-  timeSpentDuration,
-}: {
-  startTime: Moment;
-  timeSpentDuration: Duration;
-}) {
+function DisplayWriting({ startTime }: { startTime: Moment }) {
+  const timeSpentDuration = moment.duration(moment().diff(startTime));
+  const timeLeftDuration = moment.duration(
+    startTime.clone().add(16, "hours").diff(moment())
+  );
+
+  const percentageSpent = (timeSpentDuration.asSeconds() / (16 * 60 * 60) * 100);
+  
+  // const percentageLeft = timeLeftDuration.asSeconds() / (16 * 60 * 60) * 100;
+  const percentageLeft = 100 - percentageSpent;
+  
+  const config: GaugeConfig = {
+    percent: timeSpentDuration.asSeconds() % 10 / 100,
+    range: {
+      color: '#30BF78',
+    },
+    indicator: {
+      pointer: {
+        style: {
+          stroke: '#D0D0D0',
+        },
+      },
+      pin: {
+        style: {
+          stroke: '#D0D0D0',
+        },
+      },
+    },
+    axis: {
+      label: {
+        formatter(v:string) {
+          return Number(v) * 100;
+        },
+      },
+      subTickLine: {
+        count: 3,
+      },
+    },
+    statistic: {
+      content: {
+        formatter: (percent: ( Datum | undefined)) => percent ? `Rate: ${(percent["percent"] * 100).toFixed(3)}%` : "0",   
+          style: {
+          color: 'rgba(0,0,0,0.65)',
+          fontWeight: 42,
+        },
+      },
+    },
+  };
   return (
-    <div className="displayStats">
+    <div className="displayStats"> 
+      <Gauge {...config} />
+      {(new Date()).toLocaleTimeString()}<br />
       {"Time spent: " +
         timeSpentDuration.format("h [hrs], m [min], s [secs]", { trim: false })}
       <br />
       {"Time spent in minutes: " +
         timeSpentDuration.format("m [minutes]", { trim: false })}
+      <br />
+      {"Percentage spent: " + percentageSpent.toFixed(3)+"%"}
+      <br />
+      {"Time left: " +
+        timeLeftDuration.format("h [hrs], m [min], s [secs]", {
+          trim: false,
+        })}
+      <br />
+      {"Time left in minutes: " +
+        timeLeftDuration.format("m [minutes]", { trim: false })}
+      <br />
+      {"Percentage left: " + percentageLeft.toFixed(3)+"%"}
       <br />
       {startTime.toISOString()} <br />
       {startTime.toLocaleString()}
