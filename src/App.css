@@ -1,5 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans&family=Fira+Sans+Condensed:ital@0;1&display=swap');
+
 .App {
   text-align: center;
+  width: 100%;
+  height: 100%;
+}
+
+#root{
+  width: 100%;
+  height: 100%;
 }
 
 .App-logo {
@@ -18,8 +27,8 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: left;
+  justify-content: left;
   font-size: calc(10px + 2vmin);
   color: white;
 }
@@ -39,4 +48,44 @@
 
 .displayStats{
   font-size: 48px;
+}
+
+.container{
+  display:flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  font-family: 'Fira Sans', sans-serif;
+}
+
+.clock{
+  flex-grow: 1;
+  font-size: 300%;
+  /* font-family: 'Fira Sans Condensed', sans-serif; */
+}
+.start-end-times{
+  flex-grow: 0.5;
+  display:flex;
+  font-size:150%
+}
+
+.start-time-item{
+  flex-grow:1;
+}
+.end-time-item{
+  flex-grow:1;
+}
+.start-end-header{
+  font-size: 100%;
+  margin: 3px;
+  text-decoration-line: underline;
+}
+
+
+.display-container{
+  flex-grow: 3;
+}
+
+.button-container{
+  flex-grow: 0.5;
 }

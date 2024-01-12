@@ -27,7 +27,7 @@ import {
 } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import moment, { Duration, Moment } from "moment";
-import { Gauge, Line } from '@ant-design/plots';
+import { Gauge, Line } from "@ant-design/plots";
 import { Datum, GaugeConfig, Options, Plot } from "@ant-design/charts";
 require("moment-duration-format");
 
@@ -66,10 +66,10 @@ function App() {
     <div className="App">
       <header></header>
 
-      <section>
+      <div className="container">
         <DisplayStats />
         <AddButton />
-      </section>
+      </div>
     </div>
   );
 }
@@ -89,7 +89,7 @@ function AddButton() {
   }
 
   return (
-    <>
+    <div className="button-container">
       <label>
         Start time:
         <input
@@ -101,7 +101,7 @@ function AddButton() {
       </label>
 
       <button onClick={addTime}>Set current start</button>
-    </>
+    </div>
   );
 }
 
@@ -145,88 +145,125 @@ function DisplayStats() {
     return <></>;
   }
 
-  return <DisplayWriting startTime={startTime}/>;
+  return <DisplayWriting startTime={startTime} />;
 }
 
-function DisplayWriting({ startTime}: { startTime: Moment}) {
+function DisplayWriting({ startTime }: { startTime: Moment }) {
   const timeSpentDuration = moment.duration(moment().diff(startTime));
   const timeLeftDuration = moment.duration(
     startTime.clone().add(16, "hours").diff(moment())
   );
 
-  const percentageSpent = (timeSpentDuration.asSeconds() / (16 * 60 * 60) * 100);
-  
+  const percentageSpent =
+    (timeSpentDuration.asSeconds() / (16 * 60 * 60)) * 100;
+
   // const percentageLeft = timeLeftDuration.asSeconds() / (16 * 60 * 60) * 100;
   const percentageLeft = 100 - percentageSpent;
-  
+
   const config: GaugeConfig = {
     percent: percentageSpent / 100,
+    width: window.innerWidth / 1.5,
+    height: window.innerHeight / 1.5,
     range: {
-      color: '#30BF78',
+      color: "#30BF78",
     },
+    renderer:'canvas',
     // innerRadius: 0.7,
     indicator: {
       pointer: {
-          style: {
-            lineWidth: 5,
-            stroke: '#D0D0D0',
-          }
+        style: {
+          lineWidth: 5,
+          stroke: "#D0D0D0",
+        },
       },
       pin: {
         style: {
-          stroke: '#D0D0D0',
+          stroke: "#D0D0D0",
         },
       },
     },
     axis: {
-      min: 0,
-      max: 1,
+      nice: true,
       label: {
-        formatter(v:string) {
-          return (Number(v)* 100).toFixed(0) + "%\n" + startTime.clone().add(Number(v) * 16, "hours").format("hh:mmA");
+        style: {
+          fill: "black",
+          // opacity: 0.6,
+          textBaseline:'middle',
+          fontSize: 16,
+        },
+        offset: -65,
+        formatter(v: string) {
+          return (
+            (Number(v) * 100).toFixed(0) +
+            "%\n" +
+            startTime
+              .clone()
+              .add(Number(v) * 16, "hours")
+              .format("hh:mmA")
+          );
         },
       },
-      tickInterval: 0.05,
+      tickLine:{
+        length: -30,
+        alignTick:true,
+      },
+      tickInterval: window.innerWidth < 600 ? 0.2 : 0.05,
       subTickLine: {
         count: 1,
       },
+      tickMethod: "time",
     },
     statistic: {
       content: {
-        formatter: (percent: ( Datum | undefined)) => percent ? `Spent: ${(percent["percent"] * 100).toFixed(3)}%` : "0",   
-          style: {
-          color: 'rgba(0,0,0,0.65)',
-          fontWeight: 42,
+        formatter: (percent: Datum | undefined) =>
+          percent
+            ? `Day Spent: ${(percent["percent"] * 100).toFixed(3)}%`
+            : "0",
+        style: { 
+          color: "black"
         },
       },
     },
   };
 
   return (
-    <div className="displayStats"> 
-      <Gauge {...config} />
-      {(new Date()).toLocaleTimeString()}<br />
-      {"Time spent: " +
-        timeSpentDuration.format("h [hrs], m [min], s [secs]", { trim: false })}
-      <br />
-      {"Time spent in minutes: " +
-        timeSpentDuration.format("m [minutes]", { trim: false })}
-      <br />
-      {"Percentage spent: " + percentageSpent.toFixed(3)+"%"}
-      <br />
-      {"Time left: " +
-        timeLeftDuration.format("h [hrs], m [min], s [secs]", {
-          trim: false,
-        })}
-      <br />
-      {"Time left in minutes: " +
-        timeLeftDuration.format("m [minutes]", { trim: false })}
-      <br />
-      {"Percentage left: " + percentageLeft.toFixed(3)+"%"}
-      <br />
-      {startTime.toISOString()} <br />
-      {startTime.toLocaleString()}
-    </div>
+    <>
+      <div className="clock">{new Date().toLocaleTimeString()}</div>
+      <div className="display-container">
+        <div className="gauge-container">
+          <Gauge {...config} />
+        </div>
+        <div className="start-end-times">
+          <div className="start-time-item">
+              <h1 className="start-end-header">Start Time</h1>
+              {startTime.format("hh:mm A, MMM d")}
+          </div>
+          <div className="end-time-item">
+              <h1 className="start-end-header">End Time</h1>
+              {startTime.clone().add(16, "hours").format("hh:mm A, MMM d")}
+          </div>
+        </div>
+        {"Time spent: " +
+          timeSpentDuration.format("h [hrs], m [min], s [secs]", {
+            trim: false,
+          })}
+        <br />
+        {"Time spent in minutes: " +
+          timeSpentDuration.format("m [minutes]", { trim: false })}
+        <br />
+        {"Percentage spent: " + percentageSpent.toFixed(3) + "%"}
+        <br />
+        {"Time left: " +
+          timeLeftDuration.format("h [hrs], m [min], s [secs]", {
+            trim: false,
+          })}
+        <br />
+        {"Time left in minutes: " +
+          timeLeftDuration.format("m [minutes]", { trim: false })}
+        <br />
+        {"Percentage left: " + percentageLeft.toFixed(3) + "%"}
+      </div>
+    </>
   );
 }
 export default App;
