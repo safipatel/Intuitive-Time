@@ -1,6 +1,7 @@
 import React, {
   MutableRefObject,
   RefObject,
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -41,6 +42,8 @@ const firebaseApp = initializeApp({
 });
 
 const db = getFirestore(firebaseApp);
+
+const GaugeMemo = memo(Gauge);
 
 type ReturnStruct = {
   start: Timestamp;
@@ -105,6 +108,8 @@ function AddButton() {
   );
 }
 
+
+
 function DisplayStats() {
   // Load-in data from firebase
   const q = useMemo(() => {
@@ -116,6 +121,7 @@ function DisplayStats() {
   // console.log(loadedStartTimeContainer?.[0].start);
   // console.log(status);
   // const startTime = moment(loadedStartTimeContainer?.[0].start.toDate());
+  const graphRef = useRef<Plot<any> | null>(null);
 
   // States that update every second or if startTime changes
   const [startTime, setStartTime] = useState<Moment>(moment());
@@ -129,6 +135,11 @@ function DisplayStats() {
     // setTimeSpentDuration(
     //   moment.duration(moment().diff(loadedStartTimeContainer[0].start.toDate()))
     // );
+    if(graphRef.current){
+      const st = (moment.duration(moment().diff(moment(loadedStartTimeContainer?.[0].start.toDate()))).asSeconds() / (16 * 60 * 60))
+
+      graphRef.current.changeData(st);
+    }
   }, [loadedStartTimeContainer]);
 
   // Resets the interval every second if the data changes which would have changed updateStats()
@@ -145,10 +156,14 @@ function DisplayStats() {
     return <></>;
   }
 
-  return <DisplayWriting startTime={startTime} />;
+  return <DisplayWriting startTime={moment(loadedStartTimeContainer?.[0].start.toDate())} graphRef = {graphRef} />;
 }
 
-function DisplayWriting({ startTime }: { startTime: Moment }) {
+
+
+
+function DisplayWriting({ startTime, graphRef }: { startTime: Moment, graphRef: any }) {
+
   const timeSpentDuration = moment.duration(moment().diff(startTime));
   const timeLeftDuration = moment.duration(
     startTime.clone().add(16, "hours").diff(moment())
@@ -162,12 +177,12 @@ function DisplayWriting({ startTime }: { startTime: Moment }) {
 
   const config: GaugeConfig = {
     percent: percentageSpent / 100,
-    width: window.innerWidth / 1.5,
-    height: window.innerHeight / 1.5,
+    width: window.innerWidth / 1.25,
+    height: window.innerHeight / 1.25,
     range: {
       color: "#30BF78",
     },
-    renderer:'canvas',
+    renderer:'svg',
     // innerRadius: 0.7,
     indicator: {
       pointer: {
@@ -189,10 +204,10 @@ function DisplayWriting({ startTime }: { startTime: Moment }) {
           fill: "black",
           // opacity: 0.6,
           textBaseline:'middle',
-          fontSize: 16,
+          fontSize: window.innerWidth * 0.01,
         },
         offset: -65,
-        formatter(v: string) {
+        formatter: useCallback((v: string) => {
           return (
             (Number(v) * 100).toFixed(0) +
             "%\n" +
@@ -201,7 +216,7 @@ function DisplayWriting({ startTime }: { startTime: Moment }) {
               .add(Number(v) * 16, "hours")
               .format("hh:mmA")
           );
-        },
+        }, []),
       },
       tickLine:{
         length: -30,
@@ -215,32 +230,36 @@ function DisplayWriting({ startTime }: { startTime: Moment }) {
     },
     statistic: {
       content: {
-        formatter: (percent: Datum | undefined) =>
-          percent
-            ? `Day Spent: ${(percent["percent"] * 100).toFixed(3)}%`
-            : "0",
+        formatter: useCallback((percent: Datum | undefined) => {
+          return percent ? `Day Spent: ${(percent["percent"] * 100).toFixed(3)}%` : "0";
+        }, []),
+
         style: { 
           color: "black"
         },
       },
     },
+    onReady: (plot) => {
+      graphRef.current = plot;
+    },
   };
-
+  const GaugeMemo = useMemo(() => (<Gauge {...config}/>), []);
   return (
     <>
       <div className="clock">{new Date().toLocaleTimeString()}</div>
       <div className="display-container">
         <div className="gauge-container">
-          <Gauge {...config} />
+           {GaugeMemo}
+          {/* <DemoGauge/> */}
         </div>
         <div className="start-end-times">
           <div className="start-time-item">
               <h1 className="start-end-header">Start Time</h1>
-              {startTime.format("hh:mm A, MMM d")}
+              {startTime.format("hh:mm A, MMM DD")}
           </div>
           <div className="end-time-item">
               <h1 className="start-end-header">End Time</h1>
-              {startTime.clone().add(16, "hours").format("hh:mm A, MMM d")}
+              {startTime.clone().add(16, "hours").format("hh:mm A, MMM DD")}
           </div>
         </div>
         {"Time spent: " +
