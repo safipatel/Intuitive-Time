@@ -25,9 +25,9 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import moment, { Duration, Moment } from "moment";
-import { Gauge, Line } from "@ant-design/plots";
-import { Datum, GaugeConfig, Options, Plot } from "@ant-design/charts";
+import moment, { Moment } from "moment";
+import { Gauge } from "@ant-design/plots";
+import { Datum, GaugeConfig, Plot } from "@ant-design/charts";
 require("moment-duration-format");
 
 const firebaseApp = initializeApp({
@@ -185,7 +185,7 @@ const GaugeMemo = memo(function GaugeMemo({
       percent:
         moment.duration(moment().diff(moment(startTime))).asSeconds() /
         (16 * 60 * 60),
-      width: window.innerWidth / 1.25,
+      // width: window.innerWidth / 40,
       height: window.innerHeight / 1.25,
       range: {
         color: "#30BF78",
@@ -258,8 +258,7 @@ function DisplayWriting({
     startTimeMoment.clone().add(16, "hours").diff(moment())
   );
 
-  const percentageSpent =
-    (timeSpentDuration.asSeconds() / (16 * 60 * 60)) * 100;
+  const percentageSpent = (timeSpentDuration.asSeconds() / (16 * 60 * 60)) * 100;
 
   // const percentageLeft = timeLeftDuration.asSeconds() / (16 * 60 * 60) * 100;
   const percentageLeft = 100 - percentageSpent;
@@ -270,34 +269,45 @@ function DisplayWriting({
       <div className="display-container">
         <div className="statistics-container">
           <div className="start-end-time">
-            {startTimeMoment.format("hh:mm A, MMM DD")}
-            <br />
-            {"🡇"}
-            <br />
-            {startTimeMoment.clone().add(16, "hours").format("hh:mm A, MMM DD")}
+            <h3>Day Timing</h3>
+            <hr />
+            <div className="time-box">
+              {startTimeMoment.format("hh:mm A, MMM DD")}
+              <br />
+              {"🡇"}
+              <br />
+              {startTimeMoment
+                .clone()
+                .add(16, "hours")
+                .format("hh:mm A, MMM DD")}
+            </div>
           </div>
-          <div className="spent-item">
-            {"Time spent: " +
-              timeSpentDuration.format("h [hrs], m [min], s [secs]", {
-                trim: false,
-              })}
+          <div className="spent-item" style={{background:`linear-gradient(to bottom, rgba(208, 208, 212, 0.231) ${percentageLeft}%, rgba(226, 65, 65, 0.454) 0%)`}}>
+            <h3>Spent</h3>
+            <hr />
+            <div>
+            {timeSpentDuration.format("h [hrs], m [min], s [secs]", {
+              trim: false,
+            })}
             <br />
-            {"Time spent in minutes: " +
-              timeSpentDuration.format("m [minutes]", { trim: false })}
+            {timeSpentDuration.format("m [minutes]", { trim: false })}
             <br />
-            {"Percentage spent: " + percentageSpent.toFixed(3) + "%"}
+            {percentageSpent.toFixed(3) + "%"}
             <br />
+            </div>
           </div>
-          <div className="left-item">
-            {"Time left: " +
-              timeLeftDuration.format("h [hrs], m [min], s [secs]", {
-                trim: false,
-              })}
+          <div className="left-item" style={{background:`linear-gradient(to bottom, rgba(208, 208, 212, 0.231) ${percentageSpent}%, rgba(31, 135, 41, 0.454) 0%)`}}>
+            <h3>Left</h3>
+            <hr />
+            <div>
+            {timeLeftDuration.format("h [hrs], m [min], s [secs]", {
+              trim: false,
+            })}
             <br />
-            {"Time left in minutes: " +
-              timeLeftDuration.format("m [minutes]", { trim: false })}
+            {timeLeftDuration.format("m [minutes]", { trim: false })}
             <br />
-            {"Percentage left: " + percentageLeft.toFixed(3) + "%"}
+            {percentageLeft.toFixed(3) + "%"}
+            </div>
           </div>
         </div>
         <div className="gauge-container">
