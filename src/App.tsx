@@ -43,8 +43,6 @@ const firebaseApp = initializeApp({
 
 const db = getFirestore(firebaseApp);
 
-const GaugeMemo = memo(Gauge);
-
 type ReturnStruct = {
   start: Timestamp;
 };
