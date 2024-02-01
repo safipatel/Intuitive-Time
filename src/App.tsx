@@ -254,9 +254,13 @@ function DisplayWriting({
 }) {
   const startTimeMoment = moment(startTime);
   const timeSpentDuration = moment.duration(moment().diff(startTime));
+  const fifteenMinBlockSpent = timeSpentDuration.asMinutes() / 15;
+
   const timeLeftDuration = moment.duration(
     startTimeMoment.clone().add(16, "hours").diff(moment())
   );
+  const fifteenMinBlockLeft = timeLeftDuration.asMinutes() / 15;
+
 
   const percentageSpent = (timeSpentDuration.asSeconds() / (16 * 60 * 60)) * 100;
 
@@ -292,6 +296,8 @@ function DisplayWriting({
             <br />
             {timeSpentDuration.format("m [minutes]", { trim: false })}
             <br />
+            {`${fifteenMinBlockSpent.toFixed(1)} blocks of 15-min`}
+            <br />
             {percentageSpent.toFixed(3) + "%"}
             <br />
             </div>
@@ -306,6 +312,8 @@ function DisplayWriting({
             <br />
             {timeLeftDuration.format("m [minutes]", { trim: false })}
             <br />
+            {`${fifteenMinBlockLeft.toFixed(1)} blocks of 15-min`}
+            <br />
             {percentageLeft.toFixed(3) + "%"}
             </div>
           </div>
@@ -313,7 +321,31 @@ function DisplayWriting({
         <div className="gauge-container">
           <GaugeMemo gaugeRef={gaugeRef} startTime={startTime} />
         </div>
-        <div className="conversions-container"></div>
+        <div className="conversions-container">
+        <div className="conversion-list">
+            <h3>Conversions</h3>
+            <hr />
+            <div>
+            {"Based on 16-hour waking day:"}
+            <br />
+            {`1 hr = ${1/16 * 100}%`}<br/>
+            {`15 mins = ${15/(16*60) * 100}%`}
+            <br />
+            {`10 mins = ${(10/(16*60) * 100).toFixed(4)}%`} <br />
+            {`1 min = ${(1/(16*60) * 100).toFixed(4)}%`} <br />
+            {`1 sec = ${(1/(16*60*60) * 100).toFixed(4)}%`} <br />
+            </div>
+            <hr />
+            <div>
+            {`1% = ${1/16 * 100}%`}<br/>
+            {`15 mins = ${15/(16*60) * 100}%`}
+            <br />
+            {`10 mins = ${(10/(16*60) * 100).toFixed(4)}%`} <br />
+            {`1 min = ${(1/(16*60) * 100).toFixed(4)}%`} <br />
+            {`1 sec = ${(1/(16*60*60) * 100).toFixed(4)}%`} <br />
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );

@@ -46,6 +46,7 @@
   }
 }
 
+/* ############## Page CSS ############### */
 
 .container{
   display:flex;
@@ -66,6 +67,7 @@
 }
 
 
+/* ### Display under clock ### */
 .display-container{
   flex-grow: 3;
   display: flex;
@@ -75,6 +77,12 @@
   }
 }
 
+.button-container{
+  flex-grow: 0.5;
+}
+
+
+/* ##### Left side ###### */
 .statistics-container{
   flex-grow: 2.5;
   display:flex;
@@ -85,7 +93,8 @@
   width: 400px;
 }
 
-.start-end-time{
+
+.start-end-time{     /* First box on left */
   border: 5px solid rgba(0, 0, 0, 0.371);
   
   @media (min-width: 600px) {
@@ -111,14 +120,15 @@
 
 }
   
-.time-box{
+
+.time-box{           
   display: inline-block;
   background-color: rgba(0, 0, 255, 0.385);
   margin: 10px;
   padding: 20px;
 }
 
-.spent-item{
+.spent-item{  /* Second box on left */
 
   flex-grow:1;
   /* display:flex;
@@ -150,7 +160,7 @@
     margin-left: 7px;
   }
 }
-.left-item{
+.left-item{   /* Third box on left */
   flex-grow:1;
 
     
@@ -182,6 +192,8 @@
   }
 }
 
+/* ####### Gauge ######  */
+
 .gauge-container{
   flex-grow:5;
   order:2;
@@ -189,31 +201,71 @@
     order:0;
   }
 }
-.conversions-container{
-  flex-grow:2.5;
-  order:3;
-  width:400px;
-}
 
-
-.button-container{
-  flex-grow: 0.5;
-}
 
 text{
-    :first-child{
-      font-size: 150%;
-    }
+  :first-child{
+    font-size: 150%;
+  }
 }
 
 .g2-html-annotation{
+
+font-size: 250%;
+transform: translateY(500px);
+@media (max-width: 600px) {
+  font-size: 120%;
+}
+}
+/* ####END Gauge##### */
+
+/* #### Right SIDE ### */
+.conversions-container{
+  flex-grow: 2.5;
+  display:flex;
+  flex-direction: column;
+  font-size:150%;
+  order:3;
+  padding-right: 20px;
+  width: 400px;
+}
+
+
+.conversion-list{     /* First box on left */
+  div{
+    text-align: left;
+    margin-left: 12px;
+  }
+
+  border: 5px solid rgba(0, 0, 0, 0.371);
   
-  font-size: 250%;
-  transform: translateY(500px);
-  @media (max-width: 600px) {
-    font-size: 120%;
+  @media (min-width: 600px) {
+    border-right: 0px;
+  }
+
+  background-color: rgba(208, 208, 212, 0.231);
+
+  h3{
+    text-align: left;
+    padding-left: 7px;
+    margin-bottom: 10px;
+    margin-top: 5px;
+  }
+  hr{
+    border-top: 3px solid #bbbbbb5a;
+    width: 50%;
+    margin-left: 7px;
   }
 }
+  
+
+
+/* #### eND Right SIDE ### */
+
+
+
+/* ### END Display under clock ### */
+
 /* 
 #-axis-label-0\.49999999999999994:first-of-type{
   font-size: xx-large;
