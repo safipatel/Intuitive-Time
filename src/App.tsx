@@ -25,9 +25,10 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import moment, { Moment } from "moment";
+import moment, { Moment, duration } from "moment";
 import { Gauge } from "@ant-design/plots";
 import { Datum, GaugeConfig, Plot } from "@ant-design/charts";
+import { FaAngleDoubleDown } from "react-icons/fa";
 require("moment-duration-format");
 
 const firebaseApp = initializeApp({
@@ -211,7 +212,7 @@ const GaugeMemo = memo(function GaugeMemo({
           style: {
             fill: "black",
             textBaseline: "middle",
-            fontSize: window.innerWidth > 600 ? window.innerWidth * 0.01 : 10,
+            fontSize: window.innerWidth > 600 ? window.innerWidth * 0.009 : 10,
             fontFamily: "'Fira Sans', sans-serif",
           },
           offset: window.innerWidth > 600 ? window.innerWidth * -0.035 : -30,
@@ -261,11 +262,14 @@ function DisplayWriting({
   );
   const fifteenMinBlockLeft = timeLeftDuration.asMinutes() / 15;
 
-
-  const percentageSpent = (timeSpentDuration.asSeconds() / (16 * 60 * 60)) * 100;
+  const percentageSpent =
+    (timeSpentDuration.asSeconds() / (16 * 60 * 60)) * 100;
 
   // const percentageLeft = timeLeftDuration.asSeconds() / (16 * 60 * 60) * 100;
   const percentageLeft = 100 - percentageSpent;
+
+  const startTimeFormatArr = startTimeMoment.format("hh:mm A, MMM DD").split(", "); 
+  const endTimeFormatArr = startTimeMoment.clone().add(16, "hours").format("hh:mm A, MMM DD").split(", ");
 
   return (
     <>
@@ -273,48 +277,61 @@ function DisplayWriting({
       <div className="display-container">
         <div className="statistics-container">
           <div className="start-end-time">
-            <h3>Day Timing</h3>
-            <hr />
-            <div className="time-box">
-              {startTimeMoment.format("hh:mm A, MMM DD")}
+            <div className="time-header">
+              <h3>Day Timing</h3>
+              <hr />
+            </div>
+            <div className="time-container">
+              <div className="time-box">
+                <div>
+              <b>{startTimeFormatArr[0]}</b>, {startTimeFormatArr[1]}
               <br />
-              {"🡇"}
+              <FaAngleDoubleDown />
               <br />
-              {startTimeMoment
-                .clone()
-                .add(16, "hours")
-                .format("hh:mm A, MMM DD")}
+              <b>{endTimeFormatArr[0]}</b>, {endTimeFormatArr[1]}
+                </div>
+              </div>
             </div>
           </div>
-          <div className="spent-item" style={{background:`linear-gradient(to bottom, rgba(208, 208, 212, 0.231) ${percentageLeft}%, rgba(226, 65, 65, 0.454) 0%)`}}>
+          <div
+            className="spent-item"
+            style={{
+              background: `linear-gradient(to bottom, rgba(208, 208, 212, 0.231) ${percentageLeft}%, rgba(226, 65, 65, 0.454) 0%)`,
+            }}
+          >
             <h3>Spent</h3>
             <hr />
             <div>
-            {timeSpentDuration.format("h [hrs], m [min], s [secs]", {
-              trim: false,
-            })}
-            <br />
-            {timeSpentDuration.format("m [minutes]", { trim: false })}
-            <br />
-            {`${fifteenMinBlockSpent.toFixed(1)} blocks of 15-min`}
-            <br />
-            {percentageSpent.toFixed(3) + "%"}
-            <br />
+              {timeSpentDuration.format("h [hrs], m [min], s [secs]", {
+                trim: false,
+              })}
+              <br />
+              {timeSpentDuration.format("m [minutes]", { trim: false })}
+              <br />
+              {`${fifteenMinBlockSpent.toFixed(1)} blocks of 15-min`}
+              <br />
+              {percentageSpent.toFixed(3) + "%"}
+              <br />
             </div>
           </div>
-          <div className="left-item" style={{background:`linear-gradient(to bottom, rgba(208, 208, 212, 0.231) ${percentageSpent}%, rgba(31, 135, 41, 0.454) 0%)`}}>
+          <div
+            className="left-item"
+            style={{
+              background: `linear-gradient(to bottom, rgba(208, 208, 212, 0.231) ${percentageSpent}%, rgba(31, 135, 41, 0.454) 0%)`,
+            }}
+          >
             <h3>Left</h3>
             <hr />
             <div>
-            {timeLeftDuration.format("h [hrs], m [min], s [secs]", {
-              trim: false,
-            })}
-            <br />
-            {timeLeftDuration.format("m [minutes]", { trim: false })}
-            <br />
-            {`${fifteenMinBlockLeft.toFixed(1)} blocks of 15-min`}
-            <br />
-            {percentageLeft.toFixed(3) + "%"}
+              {timeLeftDuration.format("h [hrs], m [min], s [secs]", {
+                trim: false,
+              })}
+              <br />
+              {timeLeftDuration.format("m [minutes]", { trim: false })}
+              <br />
+              {`${fifteenMinBlockLeft.toFixed(1)} blocks of 15-min`}
+              <br />
+              {percentageLeft.toFixed(3) + "%"}
             </div>
           </div>
         </div>
@@ -322,27 +339,29 @@ function DisplayWriting({
           <GaugeMemo gaugeRef={gaugeRef} startTime={startTime} />
         </div>
         <div className="conversions-container">
-        <div className="conversion-list">
+          <div className="conversion-list">
             <h3>Conversions</h3>
             <hr />
             <div>
-            {"Based on 16-hour waking day:"}
-            <br />
-            {`1 hr = ${1/16 * 100}%`}<br/>
-            {`15 mins = ${15/(16*60) * 100}%`}
-            <br />
-            {`10 mins = ${(10/(16*60) * 100).toFixed(4)}%`} <br />
-            {`1 min = ${(1/(16*60) * 100).toFixed(4)}%`} <br />
-            {`1 sec = ${(1/(16*60*60) * 100).toFixed(4)}%`} <br />
+              {"Based on 16-hour waking day:"}
+              <br />
+              {`1 hr = ${(1 / 16) * 100}%`}
+              <br />
+              {`15 mins = ${(15 / (16 * 60)) * 100}%`}
+              <br />
+              {`10 mins = ${((10 / (16 * 60)) * 100).toFixed(4)}%`} <br />
+              {`1 min = ${((1 / (16 * 60)) * 100).toFixed(4)}%`} <br />
+              {`1 sec = ${((1 / (16 * 60 * 60)) * 100).toFixed(4)}%`} <br />
             </div>
             <hr />
             <div>
-            {`1% = ${1/16 * 100}%`}<br/>
-            {`15 mins = ${15/(16*60) * 100}%`}
-            <br />
-            {`10 mins = ${(10/(16*60) * 100).toFixed(4)}%`} <br />
-            {`1 min = ${(1/(16*60) * 100).toFixed(4)}%`} <br />
-            {`1 sec = ${(1/(16*60*60) * 100).toFixed(4)}%`} <br />
+              {`25% = 4 hrs`}
+              <br />
+              {`10% = 1 hrs, 36 mins`}
+              <br />
+              {`5% = 48 mins`}
+              <br />
+              {`1% = 9 mins, 36 seconds`} <br />
             </div>
           </div>
         </div>
