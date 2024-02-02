@@ -28,7 +28,9 @@ import { useCollectionData } from "react-firebase-hooks/firestore";
 import moment, { Moment, duration } from "moment";
 import { Gauge } from "@ant-design/plots";
 import { Datum, GaugeConfig, Plot } from "@ant-design/charts";
-import { FaAngleDoubleDown } from "react-icons/fa";
+import { FaAngleDoubleRight } from "react-icons/fa";
+import { BsSunFill, BsMoonFill } from "react-icons/bs";
+
 require("moment-duration-format");
 
 const firebaseApp = initializeApp({
@@ -100,7 +102,7 @@ function AddButton() {
         />
       </label>
 
-      <button onClick={addTime}>Set current start</button>
+      <button onClick={addTime}>Set today's start</button>
     </div>
   );
 }
@@ -112,10 +114,6 @@ function DisplayStats() {
     return query(timesRef, orderBy("start", "desc"), limit(1));
   }, []);
   const [loadedStartTimeContainer, status] = useCollectionData(q);
-
-  // console.log(loadedStartTimeContainer?.[0].start);
-  // console.log(status);
-  // const startTime = moment(loadedStartTimeContainer?.[0].start.toDate());
 
   // States that update every second or if startTime changes
   const [startTime, setStartTime] = useState<Moment>(moment());
@@ -187,7 +185,10 @@ const GaugeMemo = memo(function GaugeMemo({
         moment.duration(moment().diff(moment(startTime))).asSeconds() /
         (16 * 60 * 60),
       // width: window.innerWidth / 40,
-      height: window.innerHeight / 1.25,
+      height:
+        window.innerWidth > 600
+          ? window.innerHeight / 1.25
+          : window.innerHeight / 1.9,
       range: {
         color: "#30BF78",
       },
@@ -256,11 +257,13 @@ function DisplayWriting({
   const startTimeMoment = moment(startTime);
   const timeSpentDuration = moment.duration(moment().diff(startTime));
   const fifteenMinBlockSpent = timeSpentDuration.asMinutes() / 15;
+  const tenMinBlockSpent = timeSpentDuration.asMinutes() / 10;
 
   const timeLeftDuration = moment.duration(
     startTimeMoment.clone().add(16, "hours").diff(moment())
   );
   const fifteenMinBlockLeft = timeLeftDuration.asMinutes() / 15;
+  const tenMinBlockLeft = timeLeftDuration.asMinutes() / 10;
 
   const percentageSpent =
     (timeSpentDuration.asSeconds() / (16 * 60 * 60)) * 100;
@@ -268,12 +271,23 @@ function DisplayWriting({
   // const percentageLeft = timeLeftDuration.asSeconds() / (16 * 60 * 60) * 100;
   const percentageLeft = 100 - percentageSpent;
 
-  const startTimeFormatArr = startTimeMoment.format("hh:mm A, MMM DD").split(", "); 
-  const endTimeFormatArr = startTimeMoment.clone().add(16, "hours").format("hh:mm A, MMM DD").split(", ");
+  const startTimeFormatArr = startTimeMoment
+    .format("hh:mm A, MMM DD")
+    .split(", ");
+  const endTimeFormatArr = startTimeMoment
+    .clone()
+    .add(16, "hours")
+    .format("hh:mm A, MMM DD")
+    .split(", ");
 
   return (
     <>
-      <div className="clock">{new Date().toLocaleTimeString()}</div>
+      <div className="clock">
+        <div className="clock-text">
+
+        {new Date().toLocaleTimeString()}
+        </div>
+      </div>
       <div className="display-container">
         <div className="statistics-container">
           <div className="start-end-time">
@@ -282,14 +296,21 @@ function DisplayWriting({
               <hr />
             </div>
             <div className="time-container">
-              <div className="time-box">
+              <div className="sun-box">
                 <div>
-              <b>{startTimeFormatArr[0]}</b>, {startTimeFormatArr[1]}
-              <br />
-              <FaAngleDoubleDown />
-              <br />
-              <b>{endTimeFormatArr[0]}</b>, {endTimeFormatArr[1]}
+                <BsSunFill /><br />
+                  <b>{startTimeFormatArr[0]}</b><br /> {startTimeFormatArr[1]}
+                  
                 </div>
+              </div>
+              <FaAngleDoubleRight  />
+
+              <div className="moon-box">
+                <div>
+                <BsMoonFill /> <br />
+                <b>{endTimeFormatArr[0]}</b> <br />
+                {endTimeFormatArr[1]}
+               </div>
               </div>
             </div>
           </div>
@@ -309,6 +330,8 @@ function DisplayWriting({
               {timeSpentDuration.format("m [minutes]", { trim: false })}
               <br />
               {`${fifteenMinBlockSpent.toFixed(1)} blocks of 15-min`}
+              <br />
+              {`${tenMinBlockSpent.toFixed(1)} blocks of 10-min`}
               <br />
               {percentageSpent.toFixed(3) + "%"}
               <br />
@@ -330,6 +353,8 @@ function DisplayWriting({
               {timeLeftDuration.format("m [minutes]", { trim: false })}
               <br />
               {`${fifteenMinBlockLeft.toFixed(1)} blocks of 15-min`}
+              <br />
+              {`${tenMinBlockLeft.toFixed(1)} blocks of 10-min`}
               <br />
               {percentageLeft.toFixed(3) + "%"}
             </div>

@@ -61,10 +61,21 @@
   font-size: 300%;
   display:flex;
   flex-direction:column;
-  justify-content:space-around;
+  justify-content: center;
+  align-items: center;
 
   /* font-family: 'Fira Sans Condensed', sans-serif; */
 }
+.clock-text{
+  display: inline-block;
+  background-color: rgba(208, 208, 212, 0.231);
+  border: 5px solid rgba(0, 0, 0, 0.371);
+  border-top: 0px;
+  border-radius: 0px 0px 10px 10px;
+  padding: 0px 3em 0px 3em;
+}
+
+
 
 
 /* ### Display under clock ### */
@@ -89,8 +100,11 @@
   flex-direction: column;
   font-size:150%;
   order:1;
-  padding-right: 20px;
-  width: 400px;
+  @media (min-width: 600px) {
+    padding-right: 20px;
+    width: 25vw;
+  }
+  
 }
 
 
@@ -104,6 +118,7 @@
   display:flex;
   flex-direction: column;
   background-color: rgba(208, 208, 212, 0.231);
+  /* MAYBETODO: add gradient in background that goes from white to gray to black as day goes on */
 
   h3{
     text-align: left;
@@ -126,7 +141,7 @@
   height: 100%;
   width: 100%;
 }
-.time-box{           
+.sun-box{           
   display: flex;
   justify-content: center;
   align-items: center;
@@ -134,8 +149,19 @@
   background-color: rgba(226, 201, 15, 0.385);
   margin: 10px;
   padding: 20px;
-  width: 45%;
-  height: 75%;
+
+  border-radius: 50%;
+  border: solid 5px rgba(0, 0, 0, 0.8);
+}
+.moon-box{           
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: whitesmoke;
+  background-color: rgba(0, 0, 0, 0.642); 
+  margin: 10px;
+  padding: 20px;
   border-radius: 50%;
   border: solid 5px rgba(0, 0, 0, 0.8);
 }
@@ -238,21 +264,25 @@ transform: translateY(500px);
   flex-direction: column;
   font-size:150%;
   order:3;
-  padding-right: 20px;
-  width: 400px;
+  @media (min-width: 600px) {
+    padding-right: 20px;
+    width: 25vw;
+  }
+  
 }
 
 
-.conversion-list{     /* First box on left */
+.conversion-list{     /* First box on right */
   div{
     text-align: left;
     margin-left: 12px;
   }
 
   border: 5px solid rgba(0, 0, 0, 0.371);
-  
+  border-top: 0px;
   @media (min-width: 600px) {
     border-right: 0px;
+    border-top: 5px solid rgba(0, 0, 0, 0.371);
   }
 
   background-color: rgba(208, 208, 212, 0.231);
