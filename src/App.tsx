@@ -29,7 +29,9 @@ import moment, { Moment, duration } from "moment";
 import { Gauge } from "@ant-design/plots";
 import { Datum, GaugeConfig, Plot } from "@ant-design/charts";
 import { FaAngleDoubleRight } from "react-icons/fa";
-import { BsSunFill, BsMoonFill } from "react-icons/bs";
+import { BsSunFill, BsMoonFill, BsGoogle } from "react-icons/bs";
+import { GoogleAuthProvider, getAuth, getRedirectResult, onAuthStateChanged, signInWithRedirect } from "firebase/auth";
+
 
 require("moment-duration-format");
 
@@ -43,6 +45,8 @@ const firebaseApp = initializeApp({
 });
 
 const db = getFirestore(firebaseApp);
+
+const provider = new GoogleAuthProvider();
 
 type ReturnStruct = {
   start: Timestamp;
@@ -64,14 +68,50 @@ const postConverter: FirestoreDataConverter<ReturnStruct> = {
 };
 
 function App() {
+  const auth = getAuth();
+  const [loggedInUserID, setLoggedInUserID] = useState<string | undefined>(undefined);
+  
+  getRedirectResult(auth)
+    .then((result) => {
+      if(!result){return;}
+      setLoggedInUserID (result.user.uid);
+    }).catch((error) => {
+       // Handle Errors here.
+       const errorCode = error.code;
+       setLoggedInUserID(undefined);
+       if (errorCode === 'auth/account-exists-with-different-credential') {
+         alert(
+           'You have already signed up with a different auth provider for that email.',
+         );
+         // If you are using multiple auth providers on your app you should handle linking
+         // the user's accounts here.
+       } else {
+         console.error(error);
+       }
+    });
+  
+    onAuthStateChanged(auth, function (user) {
+      setLoggedInUserID(user?.uid);
+      // if (user) {
+      //   setLoggedInUserID(user.uid);
+      // } else {
+      //   setLoggedInUserID(undefined);
+      // }
+    });
+  
+
   return (
     <div className="App">
-      <header></header>
-
-      <div className="container">
+      
+      {
+        loggedInUserID!==undefined ?
+      (<div className="container">
         <DisplayStats />
         <AddButton />
-      </div>
+      </div>) 
+      : (<div className={"button-container"}><button className={"sign-in-button"} onClick={(e) => signInWithRedirect(auth, provider)}>Sign in with Google <BsGoogle /></button></div>)
+        }
+
     </div>
   );
 }
