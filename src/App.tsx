@@ -23,6 +23,7 @@ import {
   DocumentData,
   doc,
   setDoc,
+  where,
 } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import moment, { Moment, duration } from "moment";
@@ -45,16 +46,19 @@ const firebaseApp = initializeApp({
 });
 
 const db = getFirestore(firebaseApp);
+const auth = getAuth();
 
 const provider = new GoogleAuthProvider();
 
 type ReturnStruct = {
   start: Timestamp;
+  created: Timestamp;
+  uid: string;
 };
 
 const postConverter: FirestoreDataConverter<ReturnStruct> = {
   toFirestore(post: WithFieldValue<ReturnStruct>): DocumentData {
-    return { start: post.start };
+    return { start: post.start, created: post.created, uid: post.uid };
   },
   fromFirestore(
     snapshot: QueryDocumentSnapshot,
@@ -63,14 +67,16 @@ const postConverter: FirestoreDataConverter<ReturnStruct> = {
     const data = snapshot.data(options);
     return {
       start: data.start,
+      created: data.created,
+      uid: data.uid,
     };
   },
 };
 
 function App() {
-  const auth = getAuth();
   const [loggedInUserID, setLoggedInUserID] = useState<string | undefined>(undefined);
-  
+  console.log(loggedInUserID);
+
   getRedirectResult(auth)
     .then((result) => {
       if(!result){return;}
@@ -99,6 +105,7 @@ function App() {
       // }
     });
   
+    console.log(loggedInUserID);
 
   return (
     <div className="App">
@@ -107,7 +114,7 @@ function App() {
         loggedInUserID!==undefined ?
       (<div className="container">
         <DisplayStats />
-        <AddButton />
+        <AddButton/>
       </div>) 
       : (<div className={"button-container"}><button className={"sign-in-button"} onClick={(e) => signInWithRedirect(auth, provider)}>Sign in with Google <BsGoogle /></button></div>)
         }
@@ -120,14 +127,16 @@ function AddButton() {
   const [inputStartTime, setInputStartTime] = useState<string | undefined>(
     moment().format("YYYY-MM-DDTHH:mm")
   );
-
+    const currentUser = auth.currentUser?.uid;
   function addTime() {
-    if (!inputStartTime || new Date(inputStartTime).getTime() > Date.now()) {
+    console.log(currentUser);
+
+    if (!inputStartTime || new Date(inputStartTime).getTime() > Date.now() || !currentUser) {
       return;
     }
     const newTimeRef = doc(collection(db, "times"));
 
-    setDoc(newTimeRef, { start: Timestamp.fromDate(new Date(inputStartTime)) });
+    setDoc(newTimeRef, { start: Timestamp.fromDate(new Date(inputStartTime)),created: Timestamp.fromDate(new Date()), uid: currentUser });
   }
 
   return (
@@ -149,15 +158,17 @@ function AddButton() {
 
 function DisplayStats() {
   // Load-in data from firebase
+  // if(!auth.currentUser){return;}
   const q = useMemo(() => {
     const timesRef = collection(db, "times").withConverter(postConverter);
-    return query(timesRef, orderBy("start", "desc"), limit(1));
+    return query(timesRef, where("uid", "==", "b8j9C8fSLhb7SYR0S5paCGDKqSM2" ), orderBy("created", "desc"), limit(1));
   }, []);
-  const [loadedStartTimeContainer, status] = useCollectionData(q);
 
+  const [loadedStartTimeContainer, status] = useCollectionData(q);
+  console.log(status);
   // States that update every second or if startTime changes
   const [startTime, setStartTime] = useState<Moment>(moment());
-
+  console.log(startTime);
   // Ref that refers to the gauge
   const gaugeRef = useRef<Plot<any> | null>(null);
 
