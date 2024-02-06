@@ -85,14 +85,15 @@
 }
 
 .clock{
-  flex-grow: 1;
+  flex-grow: 2;
   font-size: 300%;
   display:flex;
   flex-direction:column;
   justify-content: center;
   align-items: center;
-
   /* font-family: 'Fira Sans Condensed', sans-serif; */
+  width: 100%;
+  margin:-5px;
 }
 .clock-text{
   display: inline-block;
@@ -101,6 +102,9 @@
   border-top: 0px;
   border-radius: 0px 0px 10px 10px;
   padding: 0px 3em 0px 3em;
+  box-sizing: border-box;
+  height: 100%;
+
 }
 
 
@@ -111,7 +115,10 @@
   flex-grow: 3;
   display: flex;
   flex-direction: row;
-  @media (max-width: 600px) {
+  
+}
+@media (max-width: 600px) {
+  .display-container{
     flex-direction: column;
   }
 }
@@ -128,20 +135,19 @@
   flex-direction: column;
   font-size:150%;
   order:1;
-  @media (min-width: 600px) {
-    padding-right: 20px;
-    width: 25vw;
+}
+@media (min-width: 600px) {
+  .statistics-container{
+  padding-right: 20px;
+  width: 25vw;
   }
-  
 }
 
 
 .start-end-time{     /* First box on left */
   border: 5px solid rgba(0, 0, 0, 0.371);
   
-  @media (min-width: 600px) {
-    border-left: 0px;
-  }
+
   flex-grow:1;
   display:flex;
   flex-direction: column;
@@ -160,6 +166,11 @@
     margin-left: 7px;
   }
 
+}
+@media (min-width: 600px) {
+  .start-end-time{
+  border-left: 0px;
+  }
 }
   
 .time-container{
@@ -208,10 +219,7 @@
 
   border: 5px solid rgba(0, 0, 0, 0.371);
   border-top: 0px;
-  @media (min-width: 600px) {
-    border-left: 0px;
-  }
-
+  
   background-color: rgba(31, 135, 41, 0.454);
 
   h3{
@@ -226,6 +234,12 @@
     margin-left: 7px;
   }
 }
+@media (min-width: 600px) {
+  .spent-item{
+    border-left: 0px;
+  }
+}
+
 .left-item{   /* Third box on left */
   flex-grow:1;
 
@@ -238,9 +252,7 @@
 
   border: 5px solid rgba(0, 0, 0, 0.371);
   border-top: 0px;
-  @media (min-width: 600px) {
-    border-left: 0px;
-  }
+
 
   background-color: rgba(208, 208, 212, 0.231);
 
@@ -258,13 +270,22 @@
   }
 }
 
+@media (min-width: 600px) {
+  .left-item{
+  border-left: 0px;
+  }
+}
+
 /* ####### Gauge ######  */
 
 .gauge-container{
   flex-grow:5;
   order:2;
-  @media (max-width: 600px) {
-    order:0;
+
+}
+@media (max-width: 600px) {
+  .gauge-container{
+  order:0;
   }
 }
 
@@ -279,9 +300,10 @@ text{
 
 font-size: 250%;
 transform: translateY(500px);
-@media (max-width: 600px) {
-  font-size: 120%;
+
 }
+@media (max-width: 600px) {
+  .g2-html-annotation{  font-size: 120%;}
 }
 /* ####END Gauge##### */
 
@@ -292,11 +314,14 @@ transform: translateY(500px);
   flex-direction: column;
   font-size:150%;
   order:3;
-  @media (min-width: 600px) {
-    padding-right: 20px;
-    width: 25vw;
-  }
+
   
+}
+@media (min-width: 600px) {
+  .conversions-container{
+  padding-right: 20px;
+  width: 25vw;
+  }
 }
 
 
@@ -308,10 +333,7 @@ transform: translateY(500px);
 
   border: 5px solid rgba(0, 0, 0, 0.371);
   border-top: 0px;
-  @media (min-width: 600px) {
-    border-right: 0px;
-    border-top: 5px solid rgba(0, 0, 0, 0.371);
-  }
+
 
   background-color: rgba(208, 208, 212, 0.231);
 
@@ -325,6 +347,12 @@ transform: translateY(500px);
     border-top: 3px solid #bbbbbb5a;
     width: 50%;
     margin-left: 7px;
+  }
+}
+@media (min-width: 600px) {
+  .conversion-list{
+    border-right: 0px;
+    border-top: 5px solid rgba(0, 0, 0, 0.371);
   }
 }
   

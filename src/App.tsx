@@ -26,12 +26,12 @@ import {
   where,
 } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import moment, { Moment, duration } from "moment";
+import moment, { Moment } from "moment";
 import { Gauge } from "@ant-design/plots";
 import { Datum, GaugeConfig, Plot } from "@ant-design/charts";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import { BsSunFill, BsMoonFill, BsGoogle } from "react-icons/bs";
-import { GoogleAuthProvider, getAuth, getRedirectResult, onAuthStateChanged, signInWithRedirect } from "firebase/auth";
+import { GoogleAuthProvider, getAuth, getRedirectResult, onAuthStateChanged, setPersistence, signInWithRedirect, browserLocalPersistence } from "firebase/auth";
 
 
 require("moment-duration-format");
@@ -47,6 +47,7 @@ const firebaseApp = initializeApp({
 
 const db = getFirestore(firebaseApp);
 const auth = getAuth();
+setPersistence(auth,browserLocalPersistence);
 
 const provider = new GoogleAuthProvider();
 
@@ -75,12 +76,14 @@ const postConverter: FirestoreDataConverter<ReturnStruct> = {
 
 function App() {
   const [loggedInUserID, setLoggedInUserID] = useState<string | undefined>(undefined);
+  const [loadingLoginState, setLoadingLoginState] = useState<boolean>(true);
   console.log(loggedInUserID);
 
   getRedirectResult(auth)
     .then((result) => {
       if(!result){return;}
       setLoggedInUserID (result.user.uid);
+      setLoadingLoginState(false);
     }).catch((error) => {
        // Handle Errors here.
        const errorCode = error.code;
@@ -98,14 +101,17 @@ function App() {
   
     onAuthStateChanged(auth, function (user) {
       setLoggedInUserID(user?.uid);
+      setLoadingLoginState(false);
       // if (user) {
       //   setLoggedInUserID(user.uid);
       // } else {
       //   setLoggedInUserID(undefined);
       // }
     });
-  
-    console.log(loggedInUserID);
+
+    if(loadingLoginState){
+      return (<div className="App"></div>);
+    }
 
   return (
     <div className="App">
@@ -161,14 +167,14 @@ function DisplayStats() {
   // if(!auth.currentUser){return;}
   const q = useMemo(() => {
     const timesRef = collection(db, "times").withConverter(postConverter);
-    return query(timesRef, where("uid", "==", "b8j9C8fSLhb7SYR0S5paCGDKqSM2" ), orderBy("created", "desc"), limit(1));
+    return query(timesRef, where("uid", "==", auth.currentUser?.uid ), orderBy("created", "desc"), limit(1));
   }, []);
 
   const [loadedStartTimeContainer, status] = useCollectionData(q);
-  console.log(status);
+
   // States that update every second or if startTime changes
   const [startTime, setStartTime] = useState<Moment>(moment());
-  console.log(startTime);
+
   // Ref that refers to the gauge
   const gaugeRef = useRef<Plot<any> | null>(null);
 
@@ -223,13 +229,13 @@ const GaugeMemo = memo(function GaugeMemo({
     },
     [startTime]
   );
-
+    console.log("hi");
   const statFormatter = useCallback((percent: Datum | undefined) => {
     return percent
       ? `Day Spent: ${(percent["percent"] * 100).toFixed(3)}%`
       : "0";
   }, []);
-
+  // window.visualViewport?.width
   const config: GaugeConfig = useMemo(
     (): GaugeConfig => ({
       percent:
